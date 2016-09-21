@@ -47,10 +47,6 @@ var init =
 
 	"use strict";
 	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
 	var _react = __webpack_require__(1);
 	
 	var _react2 = _interopRequireDefault(_react);
@@ -79,7 +75,7 @@ var init =
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	// TODO: usage tooltip
+	// TODO: remove bootstrap
 	
 	(0, _reactDom.render)(_react2.default.createElement(
 	    _reactRedux.Provider,
@@ -87,7 +83,7 @@ var init =
 	    _react2.default.createElement(_Toolbar2.default, null)
 	), document.getElementById("toolbar"));
 	
-	exports.default = _init2.default;
+	(0, _init2.default)();
 
 /***/ },
 /* 1 */
@@ -30927,10 +30923,10 @@ var init =
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = (0, _redux.createStore)(_index2.default, {
-	    center: { lat: 46.481631, lng: 30.732226, data: { id: (0, _uuid2.default)(), name: "I'm here" } },
+	    center: { id: (0, _uuid2.default)(), lat: 50.083702, lng: 14.434289, data: { name: "I'm here" } },
 	    points: (0, _forEach2.default)(function (point) {
-	        return point.data.id = (0, _uuid2.default)();
-	    })([{ lat: 46.492778, lng: 30.747841, data: { name: "Home" } }, { lat: 46.481226, lng: 30.738485, data: { name: "Mountain" } }, { lat: 46.470236, lng: 30.730643, data: { name: "Forest" } }, { lat: 46.464879, lng: 30.706502, data: { name: "River" } }])
+	        return point.id = (0, _uuid2.default)();
+	    })([{ lat: 50.083132, lng: 14.462187, data: { name: "2000" } }, { lat: 50.089543, lng: 14.412834, data: { name: "Bridge" } }, { lat: 50.083510, lng: 14.395006, data: { name: "Tower" } }, { lat: 50.092989, lng: 14.429555, data: { name: "Park" } }, { lat: 50.080977, lng: 14.409966, data: { name: "Island" } }, { lat: 50.087119, lng: 14.420635, data: { name: "Astronomical Clock" } }])
 	}, window.devToolsExtension && window.devToolsExtension());
 
 /***/ },
@@ -31305,9 +31301,7 @@ var init =
 	var initialState = [];
 	
 	var findPoint = function findPoint(points, point) {
-	    return (0, _find2.default)(function (p) {
-	        return p.data.id == point.data.id;
-	    })(points);
+	    return (0, _find2.default)({ id: point.id })(points);
 	};
 	
 	function points() {
@@ -31321,8 +31315,8 @@ var init =
 	            return (0, _cloneState2.default)(state, function (s) {
 	                var point = findPoint(s, action.point);
 	                point && (point.visible = true);
-	                point.distance = (0, _round2.default)(action.point.distance);
-	                point.bearing = (0, _round2.default)(action.point.bearing);
+	                point.distance = (0, _round2.default)(action.radar.distance);
+	                point.bearing = (0, _round2.default)(action.radar.bearing);
 	                return s;
 	            });
 	
@@ -31574,8 +31568,8 @@ var init =
 	var DETECT = exports.DETECT = "POINT_DETECT";
 	var HIDE = exports.HIDE = "POINT_HIDE";
 	
-	function detect(point) {
-	    return { type: DETECT, point: point };
+	function detect(point, radar) {
+	    return { type: DETECT, point: point, radar: radar };
 	}
 	
 	function hide(point) {
@@ -31675,6 +31669,8 @@ var init =
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	// TODO: usage tooltip
+	
 	var Toolbar = function (_Component) {
 	    _inherits(Toolbar, _Component);
 	
@@ -31683,7 +31679,7 @@ var init =
 	
 	        var _this = _possibleConstructorReturn(this, (Toolbar.__proto__ || Object.getPrototypeOf(Toolbar)).call(this, props));
 	
-	        _this.onDetectPoint = _this.onDetectPoint.bind(_this);
+	        _this.handleDetectPoint = _this.handleDetectPoint.bind(_this);
 	        return _this;
 	    }
 	
@@ -31696,7 +31692,7 @@ var init =
 	
 	            return _react2.default.createElement(
 	                "div",
-	                { className: "container-fluid" },
+	                { className: "toolbar container-fluid" },
 	                _react2.default.createElement(
 	                    "div",
 	                    null,
@@ -31713,18 +31709,18 @@ var init =
 	                        geoRadius: 2000,
 	                        center: center,
 	                        points: points,
-	                        onDetect: this.onDetectPoint
+	                        onDetect: this.handleDetectPoint
 	                    })
 	                ),
 	                _react2.default.createElement(_Points2.default, { points: points })
 	            );
 	        }
 	    }, {
-	        key: "onDetectPoint",
-	        value: function onDetectPoint(point) {
+	        key: "handleDetectPoint",
+	        value: function handleDetectPoint(point, radar) {
 	            var pointActions = this.props.pointActions;
 	
-	            pointActions.detect(point);
+	            pointActions.detect(point, radar);
 	            setTimeout(function () {
 	                return pointActions.hide(point);
 	            }, 5000);
@@ -31737,10 +31733,6 @@ var init =
 	Toolbar.propTypes = {
 	    center: _react.PropTypes.object.isRequired,
 	    points: _react.PropTypes.array.isRequired
-	};
-	
-	Toolbar.defaultProps = {
-	    points: []
 	};
 	
 	var mapStateToProps = function mapStateToProps(state) {
@@ -31809,7 +31801,7 @@ var init =
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	/**
-	 * TODO: beep, callbacks
+	 * TODO: beep, callbacks, shouldComponentUpdate, grid padding and overlay
 	 */
 	
 	var Radar = function (_React$Component) {
@@ -31849,14 +31841,16 @@ var init =
 	                    { width: radius * 2, height: radius * 2, style: { backgroundColor: "#1F2420" } },
 	                    _react2.default.createElement(_Grid2.default, { radius: radius }),
 	                    _react2.default.createElement(_Indicator2.default, { angle: angle,
+	                        centerSize: radius / 40,
 	                        d: indicator,
 	                        radius: radius }),
 	                    _react2.default.createElement(
 	                        "g",
 	                        { className: "points" },
 	                        (0, _map2.default)(function (point) {
-	                            return _react2.default.createElement(_Point2.default, { key: "" + point.distance + point.bearing,
+	                            return _react2.default.createElement(_Point2.default, { key: point.id,
 	                                data: point,
+	                                size: radius / 20,
 	                                visible: point.bearing <= angle - 5 && point.bearing >= angle - 50,
 	                                onDetect: _this2._onDetect });
 	                        })(points)
@@ -31890,8 +31884,14 @@ var init =
 	        }
 	    }, {
 	        key: "_onDetect",
-	        value: function _onDetect(point) {
-	            this.props.onDetect(point.getData());
+	        value: function _onDetect(p) {
+	            var _p$getData = p.getData();
+	
+	            var point = _p$getData.point;
+	            var radar = _p$getData.radar;
+	            var onDetect = this.props.onDetect;
+	
+	            onDetect(point, radar);
 	        }
 	    }]);
 	
@@ -32660,6 +32660,10 @@ var init =
 	    value: true
 	});
 	
+	var _uuid = __webpack_require__(401);
+	
+	var _uuid2 = _interopRequireDefault(_uuid);
+	
 	var _assign = __webpack_require__(421);
 	
 	var _assign2 = _interopRequireDefault(_assign);
@@ -32677,20 +32681,21 @@ var init =
 	var Point = (0, _assign2.default)({}, _geo2.default, {
 	    getData: function getData() {
 	        return {
-	            lat: this.orig.lat,
-	            lng: this.orig.lng,
-	            data: (0, _cloneDeep2.default)(this.orig.data),
-	            distance: this.distance,
-	            bearing: this.bearing
+	            point: this.orig,
+	            radar: {
+	                distance: this.distance,
+	                bearing: this.bearing
+	            }
 	        };
 	    }
 	});
 	
 	var CreatePoint = function CreatePoint(p) {
 	    return (0, _assign2.default)(Object.create(Point), {
+	        id: p.id || (0, _uuid2.default)(),
 	        lat: (0, _geo.deg2rad)(p.lat),
 	        lng: (0, _geo.deg2rad)(p.lng),
-	        orig: p
+	        orig: (0, _cloneDeep2.default)(p)
 	    });
 	};
 	
@@ -32798,7 +32803,7 @@ var init =
 	    }), (0, _sortBy2.default)(["distance"]), (0, _map2.default)(function (point) {
 	        return _react2.default.createElement(
 	            "tr",
-	            { key: point.data.id },
+	            { key: point.id },
 	            _react2.default.createElement(
 	                "td",
 	                { className: "col-md-6" },
@@ -33515,7 +33520,7 @@ var init =
 	
 	
 	// module
-	exports.push([module.id, "body {\n  background-color: #1F2420;\n  color: #43A94E; }\n\n#map {\n  position: fixed !important;\n  top: 0;\n  left: 500px;\n  right: 0;\n  bottom: 0; }\n\n.toolbar {\n  width: 500px; }\n  .toolbar h3 {\n    margin-bottom: 20px; }\n\n.points-table {\n  font-size: 12px; }\n  .points-table table {\n    margin-top: 20px; }\n    .points-table table.table-bordered > thead > tr > th {\n      border-bottom-width: 1px; }\n  .points-table table, .points-table th, .points-table td {\n    border-color: #43A94E !important; }\n", ""]);
+	exports.push([module.id, "body {\n  background-color: #1F2420;\n  color: #43A94E; }\n\n#map {\n  position: fixed !important;\n  top: 0;\n  left: 500px;\n  right: 0;\n  bottom: 0; }\n\n#toolbar {\n  width: 500px; }\n\n.toolbar h3 {\n  margin-bottom: 20px; }\n\n.points-table {\n  font-size: 12px; }\n  .points-table table {\n    margin-top: 20px; }\n    .points-table table.table-bordered > thead > tr > th {\n      border-bottom-width: 1px; }\n  .points-table table, .points-table th, .points-table td {\n    border-color: #43A94E !important; }\n", ""]);
 	
 	// exports
 
